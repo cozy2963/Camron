@@ -1,5 +1,14 @@
 module.exports = function(grunt) {
-  require('load-grunt-tasks')(grunt);
+
+  grunt.loadNpmTasks('grunt-contrib-htmlmin');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
+  grunt.loadNpmTasks('grunt-imageoptim');
+  grunt.loadNpmTasks('grunt-contrib-imagemin');
+  grunt.loadNpmTasks('grunt-responsive-images');
+
 
   grunt.initConfig({
   htmlmin: {                                     // Task
@@ -9,7 +18,12 @@ module.exports = function(grunt) {
         collapseWhitespace: true
       },
       files: {                                   // Dictionary of files
-        'dist/index.html': 'start.html',     // 'destination': 'source'
+        'dest/index.html': 'index.html',
+        'dest/project-2048.html': 'project-2048.html',
+        'dest/project-mobile.html': 'project-mobile.html',
+        'dest/project-webperf.html': 'project-webperf.html',
+        'dest/pizza.html': 'views/pizza.html',
+             // 'destination': 'source'
       }
     }
   },
@@ -18,17 +32,17 @@ module.exports = function(grunt) {
       separator: ';',
     },
     dist: {
-      src: ['js/helper.js', 'js/revise.js', 'js/app.js'],
+      src: ['js/perfmatters.js', 'views/js/main.js'],
       dest: 'dest/js/built.js',
     }
   },
   jshint: {
-      all: ['Gruntfile.js','js/*.js']
+      all: ['Gruntfile.js','js/*.js', 'views/js/*.js']
   },
   uglify: {
     my_target: {
       files: {
-        'dest/js/output.min.js': ['js/perfmatters.js']
+        'dest/js/built.min.js': ['dest/js/built.js']
       }
     }
   },
@@ -36,35 +50,75 @@ module.exports = function(grunt) {
     my_target: {
       files: [{
           expand: true,
-          cwd: 'css/',
+          cwd: 'views/css/',
           src: ['*.css', '!*.min.css'],
-          dest: 'dest/css/',
-          ext: '.min.css'
+          dest: 'dest/cssviews/',
+          ext: '.css'
 
 
     }]
   }
 },
 
+responsive_images: {
+     dev: {
+       options: {
+         engine: 'im',
+         sizes: [{
+           width: 400,
+           suffix: '_large',
+           quality: 50
+         }]
+       },
+
+       /*
+       You don't need to change this part if you don't change
+       the directory structure.
+       */
+       files: [{
+         expand: true,
+         src: ['*.{gif,jpg,png}'],
+         cwd: 'views/images',
+         dest: 'dest/min'
+       }]
+     }
+   },
+
+
+imagemin: {
+  options: {
+    optimizationLevel: 3
+  },
+    dynamic: {
+      files: [{
+        expand: true,
+        cwd: 'views/images/',
+        src: ['**/*.{png,jpg,gif}'],
+        dest: 'dest/'
+      }]
+    }
+  },
+
 imageoptim: {
 myTask: {
   options: {
     jpegMini: false,
-    imageAlpha: false,
+    imageAlpha: true,
     quitAfter: true
   },
-  src: ['img'],
-  dest: 'dest/img/'
+  src: ['views/imgages'],
 }
 }
 });
 
 grunt.registerTask('default', [
   'jshint',
+  'imagemin',
   'htmlmin',
   'concat',
   'uglify',
   'cssmin',
-  'imageoptim'
+  'imageoptim',
+  'responsive_images'
 ]);
 };
